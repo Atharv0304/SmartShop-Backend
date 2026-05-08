@@ -40,9 +40,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
-            "http://localhost:3000",
-            "https://your-frontend.onrender.com"  // ← replace with your actual frontend URL
-        ));
+        	    "http://localhost:3000",
+        	    "https://smart-shop-frontend-66m8.vercel.app"  // ← your Vercel URL
+        	));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
