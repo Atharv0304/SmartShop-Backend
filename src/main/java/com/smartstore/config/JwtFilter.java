@@ -27,7 +27,8 @@ public class JwtFilter extends OncePerRequestFilter {
         "/api/delivery/login",
         "/api/delivery/register",
         "/api/delivery/send-otp",
-        "/api/delivery/verify-otp"
+        "/api/delivery/verify-otp",
+        "/api/admin/login"          // ← add any other public endpoints here
     );
 
     @Override
@@ -38,7 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // Allow all API paths
+        // Skip filter for public URLs
         for (String url : PUBLIC_URLS) {
             if (path.startsWith(url)) {
                 filterChain.doFilter(request, response);
@@ -46,7 +47,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-        // Check token for other paths
+        // Validate JWT token
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
@@ -56,8 +57,9 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
+        // Reject unauthorized requests
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
-        response.getWriter().write("Unauthorized");
+        response.getWriter().write("{\"error\": \"Unauthorized\"}");  // ← proper JSON response
     }
 }
