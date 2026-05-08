@@ -7,6 +7,6 @@ COPY . .
 RUN chmod +x mvnw
 RUN ./mvnw clean package -DskipTests
 
-EXPOSE 8080
+EXPOSE 8070
 
 CMD ["java", "-jar", "target/smartstore-0.0.1-SNAPSHOT.jar"]
