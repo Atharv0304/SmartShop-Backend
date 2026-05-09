@@ -14,6 +14,9 @@ public class OtpService {
     @Autowired
     private JavaMailSender mailSender;
 
+    @org.springframework.beans.factory.annotation.Value("${app.mail.from}")
+    private String fromEmail;
+
     private Map<String, String> otpStorage = new HashMap<>();
 
     // Generate and send OTP for registration
@@ -24,6 +27,7 @@ public class OtpService {
         
         try {
             SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
             message.setTo(email);
             message.setSubject("Smart Store - Email Verification OTP");
             message.setText(
@@ -46,6 +50,7 @@ public class OtpService {
         
         try {
             SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
             message.setTo(email);
             message.setSubject("Smart Store - Account Deletion OTP");
             message.setText(
@@ -78,6 +83,7 @@ public class OtpService {
                                  Long orderId) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
             message.setTo(customerEmail);
             message.setSubject("Smart Store - Delivery OTP for Order #" + orderId);
             message.setText(
