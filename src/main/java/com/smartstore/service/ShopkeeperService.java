@@ -83,15 +83,8 @@ public class ShopkeeperService {
             productRepository.deleteAll(products);
         }
 
-        // 2. Delete the shop (also linked by email)
-        shopRepository.findByEmail(email).ifPresent(shop -> {
-            // Delete all orders for this shop
-            java.util.List<com.smartstore.model.Order> shopOrders = orderRepository.findByShopIdOrderByIdDesc(shop.getId());
-            if (!shopOrders.isEmpty()) {
-                orderRepository.deleteAll(shopOrders);
-            }
-            shopRepository.delete(shop);
-        });
+        // 2. Delete the shop (DO NOT delete customer orders — they are the customer's history)
+        shopRepository.findByEmail(email).ifPresent(shop -> shopRepository.delete(shop));
 
         // 3. Delete shopkeeper notifications
         notificationRepository.deleteByUserId(shopkeeper.getId());
