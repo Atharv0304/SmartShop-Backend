@@ -64,18 +64,22 @@ public class OrderService {
             " placed! Total: ₹" + saved.getTotalAmount(),
             saved.getId(), null);
 
-        // For PICKUP orders, notify the shopkeeper immediately
-        if ("PICKUP".equals(saved.getDeliveryType())) {
-            String paymentNote = "ONLINE".equals(saved.getPaymentMethod())
-                ? " | ✅ Payment received online (₹" + saved.getTotalAmount() + ")"
-                : " | 💵 Customer will pay cash at pickup";
-            notificationService.createNotification(
-                saved.getShopId(), "SHOPKEEPER", "PICKUP_ORDER",
-                "🏪 New Pickup Order #" + saved.getId(),
-                "Customer " + saved.getCustomerName() + " (📞 " + saved.getCustomerPhone() + ") placed a PICKUP order." +
-                paymentNote + " | Please prepare the order.",
-                saved.getId(), null);
-        }
+        // Always notify shopkeeper for ALL order types (PICKUP and HOME_DELIVERY)
+        String paymentNote = ("RAZORPAY".equals(saved.getPaymentMethod()) || "ONLINE".equals(saved.getPaymentMethod()))
+            ? " | ✅ Payment received online (₹" + saved.getTotalAmount() + ")"
+            : " | 💵 Customer will pay cash";
+
+        String deliveryNote = "PICKUP".equals(saved.getDeliveryType())
+            ? " | 🏪 PICKUP order — customer will come to shop."
+            : " | 🚚 HOME DELIVERY to: " + saved.getDeliveryAddress();
+
+        notificationService.createNotification(
+            saved.getShopId(), "SHOPKEEPER", "NEW_ORDER",
+            "🛒 New Order #" + saved.getId() + "!",
+            "Customer " + saved.getCustomerName() + " (📞 " + saved.getCustomerPhone() + ") placed an order." +
+            paymentNote + deliveryNote + " | Total: ₹" + saved.getTotalAmount(),
+            saved.getId(), null);
+
         return saved;
     }
 
