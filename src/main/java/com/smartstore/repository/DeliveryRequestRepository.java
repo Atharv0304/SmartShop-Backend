@@ -11,5 +11,7 @@ public interface DeliveryRequestRepository
     List<DeliveryRequest> findByDeliveryBoyIdAndStatus(
         Long deliveryBoyId, String status);
     List<DeliveryRequest> findByOrderId(Long orderId);
+    List<DeliveryRequest> findByDeliveryBoyId(Long deliveryBoyId);
+    void deleteByDeliveryBoyId(Long deliveryBoyId);
     boolean existsByOrderIdAndStatus(Long orderId, String status);
 }

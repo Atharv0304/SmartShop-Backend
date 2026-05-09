@@ -1,10 +1,14 @@
 package com.smartstore.service;
 
 import com.smartstore.model.Shopkeeper;
+import com.smartstore.repository.NotificationRepository;
+import com.smartstore.repository.OrderRepository;
+import com.smartstore.repository.ProductRepository;
 import com.smartstore.repository.ShopkeeperRepository;
 import com.smartstore.repository.ShopRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Service
@@ -15,6 +19,15 @@ public class ShopkeeperService {
 
     @Autowired
     private ShopRepository shopRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     // Check if email exists
     public boolean emailExists(String email) {
@@ -54,15 +67,38 @@ public class ShopkeeperService {
         return null;
     }
 
-    // Delete Profile
+    // Delete Profile — cascade delete products, shop, orders, notifications
+    @Transactional
     public boolean deleteShopkeeper(String email) {
         Optional<Shopkeeper> shopkeeperOpt = shopkeeperRepository.findByEmail(email);
-        if (shopkeeperOpt.isPresent()) {
-            shopkeeperRepository.delete(shopkeeperOpt.get());
-            // Also delete the shop if it exists
-            shopRepository.findByEmail(email).ifPresent(shop -> shopRepository.delete(shop));
-            return true;
+        if (!shopkeeperOpt.isPresent()) {
+            return false;
         }
-        return false;
+
+        Shopkeeper shopkeeper = shopkeeperOpt.get();
+
+        // 1. Delete all products belonging to this shopkeeper (linked by email)
+        java.util.List<com.smartstore.model.Product> products = productRepository.findByShopkeeperEmail(email);
+        if (!products.isEmpty()) {
+            productRepository.deleteAll(products);
+        }
+
+        // 2. Delete the shop (also linked by email)
+        shopRepository.findByEmail(email).ifPresent(shop -> {
+            // Delete all orders for this shop
+            java.util.List<com.smartstore.model.Order> shopOrders = orderRepository.findByShopIdOrderByIdDesc(shop.getId());
+            if (!shopOrders.isEmpty()) {
+                orderRepository.deleteAll(shopOrders);
+            }
+            shopRepository.delete(shop);
+        });
+
+        // 3. Delete shopkeeper notifications
+        notificationRepository.deleteByUserId(shopkeeper.getId());
+
+        // 4. Delete the shopkeeper account
+        shopkeeperRepository.delete(shopkeeper);
+
+        return true;
     }
 }

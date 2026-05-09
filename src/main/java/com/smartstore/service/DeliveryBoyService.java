@@ -2,8 +2,12 @@ package com.smartstore.service;
 
 import com.smartstore.model.DeliveryBoy;
 import com.smartstore.repository.DeliveryBoyRepository;
+import com.smartstore.repository.DeliveryRequestRepository;
+import com.smartstore.repository.NotificationRepository;
+import com.smartstore.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +16,15 @@ public class DeliveryBoyService {
 
     @Autowired
     private DeliveryBoyRepository deliveryBoyRepository;
+
+    @Autowired
+    private DeliveryRequestRepository deliveryRequestRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     public String validateRegistration(DeliveryBoy boy) {
         if (deliveryBoyRepository.existsByEmail(boy.getEmail()))
@@ -77,11 +90,34 @@ public class DeliveryBoyService {
         return deliveryBoyRepository.save(boy);
     }
 
+    @Transactional
     public boolean deleteDeliveryBoy(Long id) {
-        if (deliveryBoyRepository.existsById(id)) {
-            deliveryBoyRepository.deleteById(id);
-            return true;
+        if (!deliveryBoyRepository.existsById(id)) {
+            return false;
         }
-        return false;
+
+        // 1. Delete all delivery requests assigned to this delivery boy
+        deliveryRequestRepository.deleteByDeliveryBoyId(id);
+
+        // 2. Unassign this delivery boy from any active orders
+        //    (set deliveryBoyId to null so orders remain but aren't linked to deleted account)
+        List<com.smartstore.model.Order> assignedOrders = orderRepository.findByDeliveryBoyIdOrderByIdDesc(id);
+        for (com.smartstore.model.Order order : assignedOrders) {
+            order.setDeliveryBoyId(null);
+            order.setDeliveryBoyName(null);
+            order.setDeliveryBoyPhone(null);
+            order.setDeliveryBoyVehicle(null);
+        }
+        if (!assignedOrders.isEmpty()) {
+            orderRepository.saveAll(assignedOrders);
+        }
+
+        // 3. Delete all notifications for this delivery boy
+        notificationRepository.deleteByUserId(id);
+
+        // 4. Delete the delivery boy account
+        deliveryBoyRepository.deleteById(id);
+
+        return true;
     }
 }
