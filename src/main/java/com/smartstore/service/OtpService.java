@@ -21,6 +21,7 @@ public class OtpService {
 
     // Generate and send OTP for registration
     public void sendOtp(String email) {
+        if (email != null) email = email.trim().toLowerCase();
         String otp = String.valueOf(new Random().nextInt(900000) + 100000);
         otpStorage.put(email, otp);
         System.out.println("Registration OTP for " + email + ": " + otp);
@@ -44,6 +45,7 @@ public class OtpService {
 
     // Generate and send OTP for deletion
     public void sendDeleteOtp(String email) {
+        if (email != null) email = email.trim().toLowerCase();
         String otp = String.valueOf(new Random().nextInt(900000) + 100000);
         otpStorage.put(email, otp);
         System.out.println("Deletion OTP for " + email + ": " + otp);
@@ -68,7 +70,13 @@ public class OtpService {
 
     // Verify OTP
     public boolean verifyOtp(String email, String otp) {
+        if (email == null || otp == null) return false;
+        email = email.trim().toLowerCase();
+        otp = otp.trim();
+        
         String stored = otpStorage.get(email);
+        System.out.println("OTP Verification Check -> Email: [" + email + "] | Entered OTP: [" + otp + "] | Stored OTP: [" + stored + "]");
+        
         if (stored != null && stored.equals(otp)) {
             otpStorage.remove(email);
             return true;
