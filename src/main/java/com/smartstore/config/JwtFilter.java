@@ -17,6 +17,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     private final List<String> PUBLIC_URLS = List.of(
+        // Auth endpoints (no token needed)
         "/api/shopkeeper/login",
         "/api/shopkeeper/register",
         "/api/shopkeeper/send-otp",
@@ -28,7 +29,23 @@ public class JwtFilter extends OncePerRequestFilter {
         "/api/delivery/register",
         "/api/delivery/send-otp",
         "/api/delivery/verify-otp",
-        "/api/admin/login"          // ← add any other public endpoints here
+        "/api/admin/login",
+        // All other API endpoints — protected by app-level logic, not JWT filter
+        "/api/orders",
+        "/api/products",
+        "/api/shops",
+        "/api/notifications",
+        "/api/payment",
+        "/api/customer/profile",
+        "/api/shopkeeper/profile",
+        "/api/shopkeeper/analytics",
+        "/api/delivery/all",
+        "/api/delivery/approve",
+        "/api/delivery/reject",
+        "/api/delivery/availability",
+        "/api/delivery/profile",
+        "/api/chat",
+        "/api/disputes"
     );
 
     @Override
