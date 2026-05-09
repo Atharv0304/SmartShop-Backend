@@ -43,11 +43,7 @@ public class SecurityConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "https://smart-shop-frontend-git-main-atharv-satghares-projects.vercel.app"
-        ));
-
+        config.setAllowedOriginPatterns(List.of("*"));
         config.setAllowedMethods(List.of(
                 "GET", "POST", "PUT", "DELETE", "OPTIONS"
         ));
