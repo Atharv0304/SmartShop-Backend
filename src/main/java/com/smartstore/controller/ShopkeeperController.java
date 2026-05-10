@@ -70,6 +70,7 @@ public class ShopkeeperController {
             String token = jwtUtil.generateToken(email);
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);
+            response.put("id", shopkeeper.getId());
             response.put("name", shopkeeper.getName());
             response.put("shopName", shopkeeper.getShopName());
             response.put("email", shopkeeper.getEmail());
@@ -134,6 +135,6 @@ public class ShopkeeperController {
         if (shopkeeper == null) {
             return ResponseEntity.status(404).body("Shopkeeper not found");
         }
-        return ResponseEntity.ok(analyticsService.getShopAnalytics(shopkeeper.getId()));
+        return ResponseEntity.ok(analyticsService.getShopAnalyticsByEmail(shopkeeper.getEmail()));
     }
 }
