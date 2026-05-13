@@ -22,5 +22,6 @@ public class ShopController {
     @GetMapping("/all")
     public List<Shop> getAllShops() {
         return shopService.getAllShops();
+     // testing cicd
     }
 }
